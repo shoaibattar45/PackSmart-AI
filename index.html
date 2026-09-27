@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PackSmart AI</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --forest:#2C5F2D; --moss:#97BC62; --amber:#E8A33D; --off:#F7F5EF;
+  --ink:#000000; --red:#B24D4D; --card:#FFFFFF;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Calibri,'Segoe UI',Arial,sans-serif;background:var(--off);color:var(--ink);-webkit-font-smoothing:antialiased}
+#app{min-height:100%;max-width:480px;margin:0 auto;position:relative;background:var(--off);display:flex;flex-direction:column}
+@media(min-width:900px){#app{max-width:1100px}}
+.btn{border:none;border-radius:14px;padding:14px 20px;font-size:15px;font-weight:600;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--forest);color:#fff}
+.btn-primary:hover{background:#254e26}
+.btn-outline{background:#fff;border:2px solid var(--forest);color:var(--forest)}
+.btn-ghost{background:transparent;color:var(--forest);text-decoration:underline}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(38,50,31,.1)}
+.pill{border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600}
+input,select{font-size:15px;padding:12px 14px;border-radius:12px;border:1px solid #d8d3c4;width:100%;font-family:inherit;background:#fff}
+label{font-size:13px;font-weight:600;color:var(--ink);opacity:.8}
+h1,h2,h3,h4{margin:0;font-weight:700}
+.topbar{padding:16px 18px;display:flex;align-items:center;gap:10px;background:var(--off);position:sticky;top:0;z-index:5}
+.back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--forest);padding:4px 8px}
+.screen{flex:1;padding:0 18px 90px;overflow-y:auto}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid #e8e4d8;display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(min-width:900px){.bottomnav{max-width:1100px}}
+.navitem{flex:1;text-align:center;padding:10px 4px 8px;border:none;background:none;cursor:pointer;color:#8a8a7a;font-size:11px;font-weight:600}
+.navitem.active{color:var(--forest)}
+.navitem .ic{font-size:20px;display:block;margin-bottom:2px}
+.step-dots{display:flex;gap:6px;justify-content:center;margin:10px 0 18px}
+.dot{width:8px;height:8px;border-radius:50%;background:#e0dccb}
+.dot.on{background:var(--forest)}
+.select-card{border:2px solid #e8e4d8;border-radius:14px;padding:16px;cursor:pointer;background:#fff;display:flex;align-items:center;gap:12px}
+.select-card.sel{border-color:var(--forest);background:#eef4e9}
+.gauge-bg{fill:none;stroke:#e6e2d4;stroke-width:10}
+.gauge-fg{fill:none;stroke:var(--moss);stroke-width:10;stroke-linecap:round;transition:stroke-dasharray .6s}
+.fadein{animation:fadein .35s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.chip{display:inline-block;background:#eef4e9;color:var(--forest);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600;margin:2px 4px 2px 0}
+.hist-card{display:flex;justify-content:space-between;align-items:center}
+.hero{background:linear-gradient(135deg,var(--forest),#3d7a3e);border-radius:20px;padding:22px 20px;color:#fff;position:relative;overflow:hidden;margin-top:14px}
+.hero::after{content:'';position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hero-cta{background:#fff;color:var(--forest);border:none;border-radius:12px;padding:13px 18px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.12);margin-top:16px}
+.stat2{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 1px 4px rgba(38,50,31,.08);display:flex;align-items:center;gap:12px}
+.stat2 .ic-wrap{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat2 .val{font-size:18px;font-weight:700;line-height:1.1}
+.stat2 .lbl{font-size:11.5px;opacity:.65;margin-top:1px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}
+.section-head a{font-size:13px;color:var(--forest);font-weight:600;cursor:pointer;text-decoration:none}
+.hist-card{transition:transform .12s,box-shadow .12s}
+.hist-card:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(38,50,31,.12)}
+.mat-tag{width:8px;height:8px;border-radius:50%;background:var(--moss);display:inline-block;margin-right:6px}
+.metric-strip{display:flex;border:1px solid #e4e0d2;border-radius:14px;background:#fff;margin-top:18px}
+.metric{flex:1;padding:16px 6px;text-align:center}
+.metric+.metric{border-left:1px solid #e4e0d2}
+.m-val{font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+.m-lbl{font-size:10.5px;opacity:.6;margin-top:4px;line-height:1.25}
+.rec-list{border:1px solid #e4e0d2;border-radius:14px;background:#fff;overflow:hidden}
+.rec-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #ece8db;cursor:pointer}
+.rec-row:last-child{border-bottom:none}
+.rec-row:hover{background:#faf9f4}
+.rec-bar{width:4px;height:32px;border-radius:2px;flex-shrink:0}
+.rec-main{flex:1;min-width:0}
+.rec-title{font-weight:600;font-size:14px}
+.rec-sub{font-size:12px;opacity:.6;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-score{font-size:13px;font-weight:700;color:var(--ink);flex-shrink:0}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------------- SAMPLE DATA ---------------- */
+const PRODUCT_CATEGORIES = {
+  'Fruits':{icon:'🍎',fresh:true,products:['Apple','Mango','Banana','Orange','Grapes','Papaya','Guava','Pomegranate','Watermelon','Pineapple','Strawberry','Other Fruit']},
+  'Vegetables':{icon:'🥦',fresh:true,products:['Tomato','Potato','Onion','Carrot','Cabbage','Cauliflower','Spinach','Cucumber','Brinjal','Capsicum','Peas','Other Vegetable']},
+  'Grains & Cereals':{icon:'🌾',fresh:false,products:['Rice','Wheat','Maize','Oats','Barley','Sorghum','Millet','Other Grain']},
+  'Pulses & Legumes':{icon:'🫘',fresh:false,products:['Chickpeas','Lentils','Kidney Beans','Green Gram','Black Gram','Pigeon Pea','Soybean','Other Pulse']},
+  'Nuts & Seeds':{icon:'🥜',fresh:false,products:['Almond','Cashew','Peanut','Walnut','Pistachio','Sunflower Seeds','Sesame Seeds','Flax Seeds','Other Nut/Seed']},
+  'Dairy Products':{icon:'🥛',fresh:false,products:['Milk','Curd','Yogurt','Cheese','Paneer','Butter','Cream','Other Dairy Product']},
+  'Bakery Products':{icon:'🍞',fresh:false,products:['Bread','Cake','Biscuits','Cookies','Bun','Muffins','Other Bakery Product']},
+  'Processed & Packaged Foods':{icon:'🥫',fresh:false,products:['Chips','Pickles','Jam','Sauces','Ready-to-Eat Food','Snacks','Dry Fruits','Other Processed Food']},
+  'Meat & Poultry':{icon:'🍗',fresh:false,products:['Chicken','Mutton','Beef','Eggs','Processed Meat','Other Meat Product']},
+  'Fish & Seafood':{icon:'🐟',fresh:false,products:['Fish','Shrimp','Prawns','Crab','Other Seafood']},
+  'Herbs & Spices':{icon:'🌿',fresh:false,products:['Coriander','Mint','Ginger','Garlic','Turmeric','Chili','Black Pepper','Other Herb/Spice']},
+  'Beverages':{icon:'🥤',fresh:false,products:['Fruit Juice','Milkshake','Soft Drink','Coconut Water','Tea','Coffee','Other Beverage']},
+  'Other':{icon:'📦',fresh:false,products:['Custom Product']}
+};
+const CATEGORY_DEFAULTS = {
+  'Fruits':{moisture:85,ph:4.0,fat:0.3,resp:'Medium'},
+  'Vegetables':{moisture:90,ph:6.0,fat:0.2,resp:'Low'},
+  'Grains & Cereals':{moisture:12,ph:6.2,fat:1.5},
+  'Pulses & Legumes':{moisture:11,ph:6.5,fat:2.0},
+  'Nuts & Seeds':{moisture:6,ph:6.0,fat:45},
+  'Dairy Products':{moisture:80,ph:6.5,fat:6.0},
+  'Bakery Products':{moisture:35,ph:5.5,fat:12},
+  'Processed & Packaged Foods':{moisture:20,ph:5.0,fat:15},
+  'Meat & Poultry':{moisture:70,ph:5.8,fat:10},
+  'Fish & Seafood':{moisture:75,ph:6.5,fat:4},
+  'Herbs & Spices':{moisture:10,ph:5.5,fat:2},
+  'Beverages':{moisture:95,ph:4.0,fat:0.1},
+  'Other':{moisture:50,ph:6.0,fat:1.0}
+};
+const PRODUCT_OVERRIDES = {
+  Tomato:{moisture:94,ph:4.5,fat:0.2,resp:'Medium'}, Potato:{moisture:79,ph:5.9,fat:0.1,resp:'Low'},
+  Apple:{moisture:86,ph:3.5,fat:0.2,resp:'Medium'}, Mango:{moisture:83,ph:4.0,fat:0.4,resp:'Medium'},
+  Rice:{moisture:12,ph:6.5,fat:0.5}, Wheat:{moisture:13,ph:6.0,fat:1.8}
+};
+function getDefaults(cat,prod){
+  const c=PRODUCT_CATEGORIES[cat], base=CATEGORY_DEFAULTS[cat]||CATEGORY_DEFAULTS.Other;
+  const o=PRODUCT_OVERRIDES[prod]||{};
+  return {moisture:o.moisture??base.moisture, ph:o.ph??base.ph, fat:o.fat??base.fat, resp:o.resp||base.resp||'Low', fresh:!!(c&&c.fresh)};
+}
+const MATERIALS = {
+  'Biodegradable Film':{otr:'120 cc/m2/day',wvtr:'18 g/m2/day',thickness:'25 micron',seal:'Heat-sealable',cost:6,sustain:8.5,shelf:12},
+  'Vacuum Packaging Film':{otr:'2 cc/m2/day',wvtr:'3 g/m2/day',thickness:'60 micron',seal:'High-barrier seal',cost:7,sustain:5.0,shelf:30},
+  'PET Packaging':{otr:'40 cc/m2/day',wvtr:'8 g/m2/day',thickness:'350 micron',seal:'Rigid, snap-fit',cost:4,sustain:5.5,shelf:20},
+  'HDPE Packaging':{otr:'180 cc/m2/day',wvtr:'2 g/m2/day',thickness:'400 micron',seal:'Rigid, screw/snap',cost:3,sustain:6.0,shelf:60},
+  'Paper-Based Packaging':{otr:'high (breathable)',wvtr:'high (breathable)',thickness:'180 gsm',seal:'Fold/glue seal',cost:2,sustain:9.2,shelf:7},
+  'Glass Packaging':{otr:'0 cc/m2/day',wvtr:'0 g/m2/day',thickness:'3 mm',seal:'Cap/lid seal',cost:5,sustain:7.0,shelf:180}
+};
+const MAT_CATEGORY = {
+  'Biodegradable Film':'Biodegradable Packaging',
+  'Vacuum Packaging Film':'Flexible Vacuum Packaging',
+  'PET Packaging':'Rigid Plastic Packaging',
+  'HDPE Packaging':'Rigid Plastic Packaging',
+  'Paper-Based Packaging':'Paper-Based Packaging',
+  'Glass Packaging':'Glass Packaging'
+};
+/* ---- api/recommendationService.js (swap for Django REST + ML model later) ---- */
+function recommendationService(input){
+  const {moisture,ph,fat,resp,storage,transport,fresh} = input;
+  let scores = {};
+  for(const m in MATERIALS) scores[m]=0;
+  if(fresh){ scores['Biodegradable Film']+=3; scores['Paper-Based Packaging']+=2; scores['PET Packaging']+=1; }
+  if(moisture>70){ scores['Vacuum Packaging Film']+=2; scores['Biodegradable Film']+=2; scores['Paper-Based Packaging']-=2; }
+  else { scores['Paper-Based Packaging']+=3; scores['HDPE Packaging']+=2; }
+  if(fat>3){ scores['Glass Packaging']+=2; scores['Vacuum Packaging Film']+=2; }
+  if(ph<4.6){ scores['Glass Packaging']+=1; scores['PET Packaging']+=1; }
+  if(resp==='High'){ scores['Biodegradable Film']+=2; scores['Paper-Based Packaging']+=1; scores['Vacuum Packaging Film']-=1; }
+  if(storage==='Frozen'){ scores['HDPE Packaging']+=2; scores['Vacuum Packaging Film']+=2; }
+  if(storage==='Chilled'){ scores['PET Packaging']+=1; scores['Vacuum Packaging Film']+=1; }
+  if(transport==='Long Distance'){ scores['Vacuum Packaging Film']+=2; scores['HDPE Packaging']+=1; scores['Glass Packaging']-=1; }
+  if(transport==='Short Distance'){ scores['Paper-Based Packaging']+=1; scores['Biodegradable Film']+=1; }
+  let best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  let maxScore=Math.max(...Object.values(scores).map(v=>v+5));
+  let conf=Math.min(97,Math.round(60+((scores[best]+5)/maxScore)*40));
+  const mat=MATERIALS[best];
+  let shelfAdj=mat.shelf;
+  if(storage==='Frozen') shelfAdj=Math.round(shelfAdj*2.2);
+  if(storage==='Chilled') shelfAdj=Math.round(shelfAdj*1.4);
+  let reason=`${best} was selected because the commodity has ${moisture}% moisture and ${fresh?'fresh-produce respiration behaviour':'a stable dry-good profile'}, pH ${ph}, and is stored ${storage.toLowerCase()} for ${transport.toLowerCase()} transport — this material's barrier and sealing properties match those conditions best.`;
+  return {material:best,confidence:conf,reason,...mat,shelf:shelfAdj,costDisplay:'₹'+mat.cost+'/kg'};
+}
+/* ---------------- SAMPLE HISTORY / SUPPLIERS ---------------- */
+let history = JSON.parse(localStorage.getItem('ps_history')||'null') || [
+  {id:1,category:'Vegetables',commodity:'Tomato',material:'Biodegradable Film',date:'2026-09-10',shelf:12,sustain:8.5},
+  {id:2,category:'Grains & Cereals',commodity:'Rice',material:'Paper-Based Packaging',date:'2026-09-05',shelf:7,sustain:9.2},
+  {id:3,category:'Fruits',commodity:'Mango',material:'Vacuum Packaging Film',date:'2026-08-28',shelf:22,sustain:5.0}
+];
+let saved = JSON.parse(localStorage.getItem('ps_saved')||'null') || [];
+const SUPPLIERS = [
+  {name:'GreenWrap Industries',loc:'Pune, MH',dist:'8 km',material:'Biodegradable Film'},
+  {name:'AgroPack Solutions',loc:'Nashik, MH',dist:'45 km',material:'Vacuum Packaging Film'},
+  {name:'EcoFiber Papers',loc:'Pune, MH',dist:'12 km',material:'Paper-Based Packaging'},
+  {name:'ClearPack PET',loc:'Mumbai, MH',dist:'150 km',material:'PET Packaging'}
+];
+/* ---------------- STATE ---------------- */
+let S = { view:'splash', lang:'English', user:null, form:{commodity:null,moisture:null,ph:null,fat:null,resp:null,storage:null,transport:null}, step:1, result:null, compareSel:[] };
+function persist(){ localStorage.setItem('ps_history',JSON.stringify(history)); localStorage.setItem('ps_saved',JSON.stringify(saved)); }
+function go(view){ S.view=view; render(); window.scrollTo(0,0); }
+
+/* ---------------- RENDER HELPERS ---------------- */
+function topbar(title,back){ return `<div class="topbar">${back?`<button class="back" onclick="${back}">←</button>`:''}<h3>${title}</h3></div>`; }
+function bottomnav(active){
+  const items=[['home','🏠','Home'],['new-1','➕','New'],['history','🕒','History'],['suppliers','📦','Suppliers'],['profile','👤','Profile']];
+  return `<div class="bottomnav">${items.map(([v,ic,l])=>`<button class="navitem ${active===v.split('-')[0]?'active':''}" onclick="go('${v}')"><span class="ic">${ic}</span>${l}</button>`).join('')}</div>`;
+}
+
+/* ---------------- SCREENS ---------------- */
+function screenSplash(){
+  return `<div class="fadein" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:var(--forest);color:#fff;text-align:center;padding:20px">
+  <div style="font-size:54px">🌾📦</div>
+  <h1 style="font-size:28px;margin-top:14px">PackSmart AI</h1>
+  <p style="opacity:.9;margin-top:6px">Smart Packaging Recommendation</p>
+  </div>`;
+}
+function screenLanguage(){
+  return `<div class="screen fadein" style="padding-top:60px;text-align:center">
+  <div style="font-size:40px">🌍</div>
+  <h2 style="margin:16px 0 4px">Choose your language</h2>
+  <p style="opacity:.7;margin-bottom:24px">You can change this later in Settings</p>
+  ${['English','मराठी (Marathi)','हिन्दी (Hindi)'].map(l=>`<div class="select-card ${S.lang===l?'sel':''}" style="margin-bottom:12px" onclick="S.lang='${l}';go('login')"><span>${l}</span></div>`).join('')}
+  </div>`;
+}
+function screenLogin(){
+  return `<div class="screen fadein" style="padding-top:60px;text-align:center">
+  <div style="font-size:40px">📦</div>
+  <h2 style="margin:16px 0 24px">Welcome to PackSmart AI</h2>
+  <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="S.user={name:'Darshan',email:'darshan@example.com',guest:false};go('home')">Login</button>
+  <button class="btn btn-outline" style="width:100%;margin-bottom:12px" onclick="S.user={name:'Darshan',email:'darshan@example.com',guest:false};go('home')">Create Account</button>
+  <button class="btn btn-ghost" onclick="S.user={name:'Guest User',email:'',guest:true};go('home')">Continue as Guest</button>
+  </div>`;
+}
+function stat(label,val){ return `<div class="card" style="text-align:center;padding:14px"><div style="font-size:20px;font-weight:700;color:var(--forest)">${val}</div><div style="font-size:12px;opacity:.7;margin-top:2px">${label}</div></div>`; }
+function stat2(icon,bg,fg,val,label){ return `<div class="stat2"><div class="ic-wrap" style="background:${bg};color:${fg}">${icon}</div><div><div class="val">${val}</div><div class="lbl">${label}</div></div></div>`; }
+function homeTag(h){
+  const tier = h.sustain>=7.5?'var(--forest)':h.sustain>=5?'var(--amber)':'var(--red)';
+  return `<div class="rec-row" onclick="alert('${h.commodity} → ${h.material}, ${h.shelf} days shelf life')">
+  <div class="rec-bar" style="background:${tier}"></div>
+  <div class="rec-main"><div class="rec-title">${h.commodity} <span style="font-weight:400;opacity:.5">→</span> ${MAT_CATEGORY[h.material]||h.material}</div><div class="rec-sub">${h.date} · ${h.shelf}-day shelf life</div></div>
+  <div class="rec-score">${h.sustain}<span style="font-weight:400;opacity:.5;font-size:11px">/10</span></div>
+  </div>`;
+}
+function screenHome(){
+  const avgShelf = Math.round(history.reduce((a,h)=>a+h.shelf,0)/history.length);
+  const avgSustain = (history.reduce((a,h)=>a+h.sustain,0)/history.length).toFixed(1);
+  const hour = new Date().getHours();
+  const greet = hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+  return `${topbar('PackSmart AI')}<div class="screen fadein">
+  <div style="padding-top:6px">
+    <div style="font-size:13px;color:var(--ink);opacity:.6;font-weight:600">${greet}</div>
+    <h2 style="font-size:23px;margin-top:3px">${S.user?S.user.name:'there'}</h2>
+    <p style="font-size:13.5px;opacity:.65;margin-top:6px;max-width:340px;line-height:1.45">Get a data-backed packaging recommendation for your commodity in under a minute.</p>
+    <button class="btn btn-primary" style="width:100%;margin-top:14px" onclick="go('new-1')">New Recommendation</button>
+  </div>
+  <div class="metric-strip">
+    <div class="metric"><div class="m-val">${history.length}</div><div class="m-lbl">Total<br>recommendations</div></div>
+    <div class="metric"><div class="m-val">${saved.length}</div><div class="m-lbl">Saved<br>materials</div></div>
+    <div class="metric"><div class="m-val">${avgSustain}</div><div class="m-lbl">Avg.<br>sustainability</div></div>
+    <div class="metric"><div class="m-val">${avgShelf}d</div><div class="m-lbl">Avg.<br>shelf life</div></div>
+  </div>
+  <div class="section-head"><h4>Recent recommendations</h4><a onclick="go('history')">View all</a></div>
+  <div class="rec-list">${history.slice(0,3).map(homeTag).join('')}</div>
+  </div>${bottomnav('home')}`;
+}
+function histCard(h){
+  return `<div class="card hist-card" style="margin-bottom:10px;cursor:pointer" onclick="alert('${h.commodity} → ${h.material}, ${h.shelf} days shelf life, ₹${MATERIALS[h.material]?MATERIALS[h.material].cost:'?'}/kg')">
+  <div><b>${h.commodity}</b><div style="font-size:13px;opacity:.7;margin-top:2px"><span class="mat-tag"></span>${MAT_CATEGORY[h.material]||h.material}</div><div style="font-size:12px;opacity:.5;margin-top:2px">${h.date} · ₹${MATERIALS[h.material]?MATERIALS[h.material].cost:'?'}/kg (est. prototype cost)</div></div>
+  <span class="pill" style="background:#eef4e9;color:var(--forest)">${h.sustain}/10</span>
+  </div>`;
+}
+/* -- New Recommendation flow -- */
+function screenNew1(){
+  S.catView = S.catView || 'cat';
+  if(S.catView==='prod' && S.form.category){
+    const cat = S.form.category, list = PRODUCT_CATEGORIES[cat].products;
+    return `${topbar('Select Product',"S.catView='cat';render()")}<div class="screen fadein">
+    <div class="step-dots">${[1,2,3,4].map(i=>`<div class="dot ${i===1?'on':''}"></div>`).join('')}</div>
+    <h3>${PRODUCT_CATEGORIES[cat].icon} ${cat}</h3>
+    <div id="plist" style="display:flex;flex-direction:column;gap:8px;margin-top:12px">${list.map(p=>`<div class="select-card" onclick="selectProduct('${cat}','${p}')"><span>${p}</span></div>`).join('')}</div>
+    </div>`;
+  }
+  return `${topbar('New Recommendation',"go('home')")}<div class="screen fadein">
+  <div class="step-dots">${[1,2,3,4].map(i=>`<div class="dot ${i===1?'on':''}"></div>`).join('')}</div>
+  <h3>Select Category</h3>
+  <div style="display:flex;gap:8px;margin:14px 0"><input id="csearch" placeholder="Search category or product..." oninput="filterCommodity()"><button class="btn btn-outline" onclick="alert('Voice input (prototype UI only)')">🎤</button></div>
+  <div id="clist" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${Object.keys(PRODUCT_CATEGORIES).map(c=>`<div class="select-card" style="flex-direction:column;text-align:center;gap:6px;padding:18px 8px" onclick="openCategory('${c}')"><span style="font-size:24px">${PRODUCT_CATEGORIES[c].icon}</span><span style="font-size:13px;font-weight:600">${c}</span></div>`).join('')}</div>
+  </div>`;
+}
+window.openCategory=function(c){ S.form.category=c; S.catView='prod'; render(); };
+window.filterCommodity=function(){
+  const q=document.getElementById('csearch').value.toLowerCase();
+  if(!q){ S.catView='cat'; return render(); }
+  let matches=[];
+  for(const cat in PRODUCT_CATEGORIES) for(const p of PRODUCT_CATEGORIES[cat].products)
+    if(p.toLowerCase().includes(q) || cat.toLowerCase().includes(q)) matches.push([cat,p]);
+  document.getElementById('clist').outerHTML = `<div id="clist" style="display:flex;flex-direction:column;gap:8px">${matches.length?matches.map(([cat,p])=>`<div class="select-card" onclick="selectProduct('${cat}','${p}')"><span style="font-size:13px;opacity:.55">${cat} →</span>&nbsp;<span>${p}</span></div>`).join(''):'<p style="opacity:.6;text-align:center;margin-top:20px">No matches.</p>'}</div>`;
+};
+window.selectProduct=function(cat,p){
+  if(p.startsWith('Other') || p==='Custom Product'){ const custom=prompt('Enter product name:'); if(!custom) return; p=custom; }
+  S.form.category=cat; S.form.commodity=p; S.catView='prod';
+  const d=getDefaults(cat,p);
+  S.form.moisture=d.moisture; S.form.ph=d.ph; S.form.fat=d.fat; S.form.resp=d.resp; S.form.fresh=d.fresh;
+  go('new-2');
+};
+function screenNew2(){
+  const f=S.form, fresh=f.fresh;
+  return `${topbar('Physical Properties','go(\'new-1\')')}<div class="screen fadein">
+  <div class="step-dots">${[1,2,3,4].map(i=>`<div class="dot ${i===2?'on':''}"></div>`).join('')}</div>
+  <h3>${f.commodity} — properties</h3>
+  <p style="opacity:.7;font-size:13px;margin-bottom:16px">Sample values pre-filled — edit if needed.</p>
+  <label>Moisture (%)</label><input type="number" id="p-moist" value="${f.moisture}" style="margin-bottom:12px">
+  <label>pH</label><input type="number" step="0.1" id="p-ph" value="${f.ph}" style="margin-bottom:12px">
+  <label>Fat (%)</label><input type="number" step="0.1" id="p-fat" value="${f.fat}" style="margin-bottom:12px">
+  ${fresh?`<label>Respiration Rate</label><select id="p-resp" style="margin-bottom:12px">${['Low','Medium','High'].map(r=>`<option ${f.resp===r?'selected':''}>${r}</option>`).join('')}</select>`:''}
+  <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="saveProps()">Continue</button>
+  </div>`;
+}
+window.saveProps=function(){
+  const m=+document.getElementById('p-moist').value, ph=+document.getElementById('p-ph').value, fat=+document.getElementById('p-fat').value;
+  if(isNaN(m)||m<0||m>100){ alert('Moisture must be a number between 0 and 100%.'); return; }
+  if(isNaN(ph)||ph<0||ph>14){ alert('pH must be a number between 0 and 14.'); return; }
+  if(isNaN(fat)||fat<0){ alert('Fat % must be a valid non-negative number.'); return; }
+  S.form.moisture=m; S.form.ph=ph; S.form.fat=fat;
+  if(document.getElementById('p-resp')) S.form.resp=document.getElementById('p-resp').value;
+  go('new-3');
+};
+function screenNew3(){
+  const f=S.form;
+  const storageDesc={Ambient:'Room temperature, no cooling required',Chilled:'Refrigerated, typically 0–8°C',Frozen:'Sub-zero storage for long-term preservation'};
+  const transDesc={'Short Distance':'Local delivery, under ~50 km','Medium Distance':'Regional transport, ~50–300 km','Long Distance':'Interstate/export transport, 300+ km'};
+  return `${topbar('Storage & Transport',"go('new-2')")}<div class="screen fadein">
+  <div class="step-dots">${[1,2,3,4].map(i=>`<div class="dot ${i===3?'on':''}"></div>`).join('')}</div>
+  <h3>Storage condition</h3>
+  <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0 20px">
+  ${['Ambient','Chilled','Frozen'].map(s=>`<div class="select-card ${f.storage===s?'sel':''}" style="flex-direction:column;align-items:flex-start;gap:2px" onclick="setStorage('${s}')"><b>${s}</b><span style="font-size:12px;opacity:.6;font-weight:400">${storageDesc[s]}</span></div>`).join('')}
+  </div>
+  <h3>Transportation distance</h3>
+  <div style="display:flex;flex-direction:column;gap:8px;margin:12px 0 20px">
+  ${['Short Distance','Medium Distance','Long Distance'].map(t=>`<div class="select-card ${f.transport===t?'sel':''}" style="flex-direction:column;align-items:flex-start;gap:2px" onclick="setTransport('${t}')"><b>${t}</b><span style="font-size:12px;opacity:.6;font-weight:400">${transDesc[t]}</span></div>`).join('')}
+  </div>
+  <button class="btn btn-primary" style="width:100%" ${(!f.storage||!f.transport)?'disabled style="opacity:.5"':''} onclick="${(!f.storage||!f.transport)?'alert(\'Please select both a storage condition and a transportation distance.\')':"go('new-4')"}">Continue</button>
+  </div>`;
+}
+window.setStorage=function(s){S.form.storage=s;render();};
+window.setTransport=function(t){S.form.transport=t;render();};
+function screenNew4(){
+  const f=S.form;
+  return `${topbar('Review',"S.catView='prod';go('new-3')")}<div class="screen fadein">
+  <div class="step-dots">${[1,2,3,4].map(i=>`<div class="dot ${i===4?'on':''}"></div>`).join('')}</div>
+  <div class="card" style="display:flex;flex-direction:column;gap:8px">
+  ${row('Category',f.category)}${row('Product',f.commodity)}${row('Moisture',f.moisture+'%')}${row('pH',f.ph)}${row('Fat',f.fat+'%')}
+  ${f.fresh?row('Respiration Rate',f.resp):''}${row('Storage',f.storage)}${row('Transportation',f.transport)}
+  </div>
+  <div style="display:flex;gap:10px;margin-top:18px">
+  <button class="btn btn-outline" style="flex:1" onclick="S.catView='prod';go('new-1')">Edit</button>
+  <button class="btn btn-primary" style="flex:1" onclick="runRecommendation()">Get Recommendation</button>
+  </div></div>`;
+}
+function row(l,v){ return `<div style="display:flex;justify-content:space-between"><span style="opacity:.6">${l}</span><b>${v}</b></div>`; }
+window.runRecommendation=function(){
+  go('loading');
+  const msgs=['Analyzing product properties...','Evaluating packaging options...','Generating recommendation...'];
+  let i=0;
+  const el=()=>document.getElementById('loadmsg');
+  const step=()=>{ if(el()) el().textContent=msgs[i]; i++;
+    if(i<msgs.length) setTimeout(step,550);
+    else setTimeout(()=>{
+      S.result = recommendationService(S.form);
+      const entry={id:Date.now(),category:S.form.category,commodity:S.form.commodity,material:S.result.material,date:new Date().toISOString().slice(0,10),shelf:S.result.shelf,sustain:S.result.sustain,cost:S.result.cost};
+      history.unshift(entry); persist();
+      go('result');
+    },550);
+  };
+  step();
+};
+function screenLoading(){
+  return `<div class="screen fadein" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:70vh;text-align:center">
+  <div style="width:44px;height:44px;border:4px solid #e6e2d4;border-top-color:var(--forest);border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <p id="loadmsg" style="margin-top:18px;font-weight:600;opacity:.8">Analyzing product properties...</p>
+  </div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
+}
+function screenResult(){
+  const r=S.result; const pct=r.sustain*10; const circ=2*Math.PI*45; const off=circ-(circ*pct/100);
+  return `${topbar('Recommendation',"go('new-4')")}<div class="screen fadein" style="text-align:center">
+  <span class="pill" style="background:#fdf1e0;color:var(--amber);letter-spacing:.3px">Prototype AI Recommendation</span>
+  <p style="opacity:.55;font-size:11.5px;margin-top:6px">Sample rule-based logic — not scientifically validated. To be replaced by a Django ML API.</p>
+  <h2 style="margin:10px 0 2px">${MAT_CATEGORY[r.material]||r.material}</h2>
+  <div style="opacity:.55;font-size:13px;margin-bottom:8px">${r.material}</div>
+  <span class="pill" style="background:#eef4e9;color:var(--forest)">Confidence ${r.confidence}%</span>
+  <div class="card" style="text-align:left;margin-top:18px"><b>Why this material</b><p style="font-size:14px;opacity:.85">${r.reason}</p></div>
+  <div class="card" style="text-align:left;margin-top:12px">
+  <b>Technical Specifications</b>
+  <div style="margin-top:8px">${row('OTR',r.otr)}${row('WVTR',r.wvtr)}${row('Thickness',r.thickness)}${row('Sealability',r.seal)}</div>
+  </div>
+  <div class="card" style="margin-top:12px;display:flex;align-items:center;gap:16px">
+  <svg width="100" height="100" viewBox="0 0 100 100"><circle class="gauge-bg" cx="50" cy="50" r="45"/><circle class="gauge-fg" cx="50" cy="50" r="45" stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 50 50)"/><text x="50" y="55" text-anchor="middle" font-size="18" font-weight="700" fill="var(--forest)">${r.sustain}</text></svg>
+  <div style="text-align:left"><b>Sustainability</b><div style="opacity:.7;font-size:13px">${r.sustain} / 10</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+  ${stat('Predicted Shelf Life',r.shelf+' days')}
+  <div class="card" style="text-align:center;padding:14px"><div style="font-size:20px;font-weight:700;color:var(--forest)">${r.costDisplay}</div><div style="font-size:11px;opacity:.7;margin-top:2px">Estimated Prototype Cost</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px">
+  <button class="btn btn-outline" onclick="saveResult()">💾 Save</button>
+  <button class="btn btn-outline" onclick="toggleCompareSel('${r.material}');go('compare')">⇄ Compare</button>
+  <button class="btn btn-outline" onclick="shareResult()">↗ Share</button>
+  <button class="btn btn-primary" onclick="go('qr')">▦ Generate QR</button>
+  </div>
+  </div>${bottomnav('home')}`;
+}
+window.saveResult=function(){ saved.unshift({...S.result,category:S.form.category,commodity:S.form.commodity,date:new Date().toISOString().slice(0,10)}); persist(); alert('Saved to your recommendations.'); };
+window.shareResult=function(){
+  const t=`PackSmart AI\nCategory: ${S.form.category}\nProduct: ${S.form.commodity}\nRecommended: ${S.result.material}\nConfidence: ${S.result.confidence}%\nEstimated Prototype Cost: ${S.result.costDisplay}\nShelf Life: ${S.result.shelf} days`;
+  if(navigator.share){ navigator.share({title:'PackSmart AI Recommendation',text:t}).catch(()=>{}); }
+  else if(navigator.clipboard){ navigator.clipboard.writeText(t).then(()=>alert('Recommendation copied to clipboard.')).catch(()=>alert(t)); }
+  else { alert(t); }
+};
+function screenQR(){
+  const r=S.result, f=S.form;
+  const data = `PackSmart AI\nCategory: ${f.category}\nProduct: ${f.commodity}\nMaterial: ${r.material}\nDate: ${new Date().toISOString().slice(0,10)}\nShelf Life: ${r.shelf} days\nSustainability: ${r.sustain}/10`;
+  setTimeout(()=>{ const el=document.getElementById('qrbox'); if(el && window.QRCode){ el.innerHTML=''; new QRCode(el,{text:data,width:180,height:180,colorDark:'#26321F',colorLight:'#ffffff'}); } },0);
+  return `${topbar('QR Traceability','go(\'result\')')}<div class="screen fadein" style="text-align:center">
+  <div class="card" style="display:inline-block;margin-top:20px"><div id="qrbox" style="width:180px;height:180px;margin:0 auto"></div></div>
+  <p style="opacity:.7;font-size:13px;margin-top:14px;white-space:pre-line">${data}</p>
+  <button class="btn btn-primary" style="width:100%;margin-top:16px" onclick="alert('Download/share depends on device support in the full build.')">Share / Download QR</button>
+  </div>`;
+}
+/* -- Compare -- */
+window.toggleCompareSel=function(m){ const i=S.compareSel.indexOf(m); if(i>-1)S.compareSel.splice(i,1); else if(S.compareSel.length<3) S.compareSel.push(m); };
+function screenCompare(){
+  const all=Object.keys(MATERIALS);
+  return `${topbar('Compare Materials','go(\'home\')')}<div class="screen fadein">
+  <p style="opacity:.7;font-size:13px">Select 2–3 materials to compare</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px">
+  ${all.map(m=>`<span class="chip" style="cursor:pointer;${S.compareSel.includes(m)?'background:var(--forest);color:#fff':''}" onclick="toggleCompareSel('${m}');render()">${m}</span>`).join('')}
+  </div>
+  ${S.compareSel.length>=2?`<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:13px">
+  <tr><td></td>${S.compareSel.map(m=>`<td style="padding:6px;font-weight:700">${m}</td>`).join('')}</tr>
+  ${['cost','shelf','otr','wvtr','thickness','seal','sustain'].map(k=>`<tr>${`<td style="padding:6px;opacity:.6;text-transform:capitalize">${k}</td>`}${S.compareSel.map(m=>`<td style="padding:6px;border-top:1px solid #eee">${k==='cost'?'₹'+MATERIALS[m][k]+'/kg':(k==='shelf'?MATERIALS[m][k]+' days':MATERIALS[m][k])}</td>`).join('')}</tr>`).join('')}
+  </table></div>`:`<p style="opacity:.6;text-align:center;margin-top:40px">Pick at least 2 materials above.</p>`}
+  </div>${bottomnav('home')}`;
+}
+/* -- History -- */
+function screenHistory(){
+  return `${topbar('History')}<div class="screen fadein">
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+  <select id="fcategory" onchange="renderHistList()"><option value="">All categories</option>${[...new Set(history.map(h=>h.category).filter(Boolean))].map(c=>`<option>${c}</option>`).join('')}</select>
+  <select id="fcommodity" onchange="renderHistList()"><option value="">All products</option>${[...new Set(history.map(h=>h.commodity))].map(c=>`<option>${c}</option>`).join('')}</select>
+  </div>
+  <div id="histlist">${history.map(histCard).join('')}</div>
+  </div>${bottomnav('history')}`;
+}
+window.renderHistList=function(){
+  const cat=document.getElementById('fcategory').value;
+  const c=document.getElementById('fcommodity').value;
+  document.getElementById('histlist').innerHTML = history.filter(h=>(!cat||h.category===cat)&&(!c||h.commodity===c)).map(histCard).join('');
+};
+/* -- Suppliers -- */
+function screenSuppliers(){
+  return `${topbar('Suppliers')}<div class="screen fadein">
+  <div class="card" style="height:120px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef4e9,#f7f5ef);margin-bottom:16px;color:var(--forest);font-weight:600">🗺️ Map view (sample area — live map in full build)</div>
+  ${SUPPLIERS.map(s=>`<div class="card" style="margin-bottom:10px">
+  <div style="display:flex;justify-content:space-between"><b>${s.name}</b><span style="font-size:12px;opacity:.6">${s.dist}</span></div>
+  <div style="font-size:13px;opacity:.7;margin:4px 0">${s.loc}</div>
+  <span class="chip">${s.material}</span>
+  <div style="margin-top:8px"><button class="btn btn-outline" style="width:100%" onclick="alert('Calling ${s.name}... (prototype)')">Contact Supplier</button></div>
+  </div>`).join('')}
+  </div>${bottomnav('suppliers')}`;
+}
+/* -- Profile / Settings -- */
+function screenProfile(){
+  return `${topbar('Profile')}<div class="screen fadein">
+  <div class="card" style="text-align:center;margin-bottom:16px">
+  <div style="font-size:40px">👤</div>
+  <h3 style="margin-top:8px">${S.user?S.user.name:'Guest'}</h3>
+  <p style="opacity:.6;font-size:13px">${S.user&&S.user.email?S.user.email:'Guest account'}</p>
+  </div>
+  ${['Saved Recommendations','Settings','About PackSmart AI'].map(x=>`<div class="select-card" style="margin-bottom:8px" onclick="${x==='Saved Recommendations'?"go('saved')":x==='Settings'?"go('settings')":"alert('PackSmart AI — an AI packaging recommendation prototype for farmers and food producers.')"}">${x}</div>`).join('')}
+  </div>${bottomnav('profile')}`;
+}
+function screenSaved(){
+  return `${topbar('Saved Recommendations',"go('profile')")}<div class="screen fadein">
+  ${saved.length? saved.map((s,idx)=>`<div class="card hist-card" style="margin-bottom:10px"><div><b>${s.commodity}</b><div style="font-size:13px;opacity:.7">${MAT_CATEGORY[s.material]||s.material}</div><div style="font-size:12px;opacity:.5">${s.date} · ₹${MATERIALS[s.material]?MATERIALS[s.material].cost:'?'}/kg</div></div><div style="display:flex;align-items:center;gap:8px"><span class="pill" style="background:#eef4e9;color:var(--forest)">${s.sustain}/10</span><button class="back" style="font-size:16px" onclick="removeSaved(${idx})" aria-label="Remove">🗑️</button></div></div>`).join('') : `<p style="opacity:.6;text-align:center;margin-top:40px">No saved recommendations yet.</p>`}
+  </div>`;
+}
+window.removeSaved=function(idx){ saved.splice(idx,1); persist(); render(); };
+function screenSettings(){
+  return `${topbar('Settings','go(\'profile\')')}<div class="screen fadein">
+  <label>Language</label>
+  <select style="margin-bottom:16px" onchange="S.lang=this.value">${['English','मराठी (Marathi)','हिन्दी (Hindi)'].map(l=>`<option ${S.lang===l?'selected':''}>${l}</option>`).join('')}</select>
+  <div class="select-card" style="margin-bottom:8px;justify-content:space-between;display:flex">Notifications <input type="checkbox" checked></div>
+  <div class="select-card" style="margin-bottom:8px" onclick="go('saved')">Saved Recommendations</div>
+  <div class="select-card" onclick="alert('PackSmart AI v0.1 — college prototype for SIH.')">About PackSmart AI</div>
+  </div>`;
+}
+
+/* ---------------- ROUTER / RENDER ---------------- */
+function render(){
+  const map = {
+    splash:screenSplash, language:screenLanguage, login:screenLogin, home:screenHome,
+    'new-1':screenNew1,'new-2':screenNew2,'new-3':screenNew3,'new-4':screenNew4,
+    result:screenResult, qr:screenQR, compare:screenCompare, history:screenHistory,
+    suppliers:screenSuppliers, profile:screenProfile, saved:screenSaved, settings:screenSettings, loading:screenLoading
+  };
+  document.getElementById('app').innerHTML = (map[S.view]||screenHome)();
+}
+render();
+setTimeout(()=>{ if(S.view==='splash') go('language'); },1800);
+</script>
+</body>
+</html>
